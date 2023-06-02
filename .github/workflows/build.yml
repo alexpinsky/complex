@@ -28,15 +28,15 @@ jobs:
     
     strategy:
       matrix:
-      include:
-        - image: alexpinsky/multi-client
-          context: ./client
-        - image: alexpinsky/multi-nginx
-          context: ./nginx
-        - image: alexpinsky/multi-server
-          context: ./server
-        - image: alexpinsky/multi-worker
-          context: ./worker
+        include:
+          - image: alexpinsky/multi-client
+            context: ./client
+          - image: alexpinsky/multi-nginx
+            context: ./nginx
+          - image: alexpinsky/multi-server
+            context: ./server
+          - image: alexpinsky/multi-worker
+            context: ./worker
       
     steps:
       -
