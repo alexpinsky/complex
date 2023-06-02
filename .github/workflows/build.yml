@@ -1,0 +1,80 @@
+name: Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build client image for testing
+        run: docker build -t alexpinsky/react-test -f ./client/Dockerfile.dev ./client
+        
+      - name: Run tests
+        run: docker run -e CI=true alexpinsky/react-test npm run test
+
+  build_and_push_to_registry:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+      include:
+        - image: alexpinsky/multi-client
+          context: ./client
+        - image: alexpinsky/multi-nginx
+          context: ./nginx
+        - image: alexpinsky/multi-server
+          context: ./server
+        - image: alexpinsky/multi-worker
+          context: ./worker
+      
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - 
+        name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ matrix.image }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }
+
+
+    # deploy:  
+    #   - name: Generate deployment package
+    #     run: zip -r deploy.zip . -x '*.git*'
+
+    #   - name: Deploy to AWS
+    #     uses: einaregilsson/beanstalk-deploy@v21
+    #     with:
+    #       aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #       aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #       application_name: docker-fronend
+    #       environment_name: Dockerfronend-env
+    #       version_label: 12345
+    #       region: us-east-1
+    #       deployment_package: deploy.zip
