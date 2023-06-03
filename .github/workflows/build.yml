@@ -63,37 +63,40 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - 
-        name: Generate deployment package
-        run: zip -r deploy.zip . -x '*.git*'
-      -
-        name: Deploy to AWS
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: multi-docker
-          environment_name: Multi-docker-env
-          version_label: 12345
-          region: eu-west-1
-          deployment_package: deploy.zip
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: build_and_push_to_registry
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_registry
 
-  #   steps:
-  #   - 
-  #     name: Generate deployment package
-  #     run: zip -r deploy.zip . -x '*.git*'
-  #   -
-  #     name: Deploy to AWS
-  #     uses: einaregilsson/beanstalk-deploy@v21
-  #     with:
-  #       aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       application_name: multi-docker
-  #       environment_name: Multi-docker-env
-  #       version_label: 12345
-  #       region: eu-west-1
-  #       deployment_package: deploy.zip
+    steps:
+    - 
+      name: Get Timestamp
+      uses: gerred/actions/current-time@master
+      id: current-time
+
+    - 
+      name: Run String Replace
+      uses: frabert/replace-string-action@master
+      id: format-time
+      with:
+        pattern: '[:\.]+'
+        string: "${{ steps.current-time.outputs.time }}"
+        replace-with: '-'
+        flags: 'g'
+    -
+      name: Test folder
+      run: echo ls -l 
+    -
+      name: Generate deployment package
+      run: zip -r deploy.zip . -x '*.git*'
+    -
+      name: Deploy to AWS
+      uses: einaregilsson/beanstalk-deploy@v21
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: multi-docker
+        environment_name: Multi-docker-env
+        version_label: ${{ steps.format-time.outputs.replaced }}
+        region: eu-west-1
+        deployment_package: deploy.zip
