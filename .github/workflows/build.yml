@@ -85,7 +85,7 @@ jobs:
         flags: 'g'
     -
       name: Test folder
-      run: echo ls -l 
+      run: ls -a
     -
       name: Generate deployment package
       run: zip -r deploy.zip . -x '*.git*'
