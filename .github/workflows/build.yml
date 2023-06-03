@@ -63,11 +63,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:  
-    - name: Generate deployment package
-      run: zip -r deploy.zip . -x '*.git*'
+  deploy:
+    runs-on: ubuntu-latest
 
-    - name: Deploy to AWS
+    steps:
+    - 
+      name: Generate deployment package
+      run: zip -r deploy.zip . -x '*.git*'
+    -
+      name: Deploy to AWS
       uses: einaregilsson/beanstalk-deploy@v21
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
