@@ -87,9 +87,6 @@ jobs:
         name: Checkout
         uses: actions/checkout@v3
     -
-      name: Test folder
-      run: ls -a
-    -
       name: Generate deployment package
       run: zip -r deploy.zip . -x '*.git*'
     -
