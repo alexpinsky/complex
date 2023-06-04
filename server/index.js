@@ -48,15 +48,23 @@ app.get("/", (req, res) => {
 });
 
 app.get("/values/all", async (req, res) => {
-  const values = await pgClient.query("SELECT * from values");
-
-  res.send(values.rows);
+  try {
+    const values = await pgClient.query("SELECT * from values");
+    res.send(values.rows);
+  } catch (error) {
+    console.error(`>>>>>>>> ERROR /values/all: ${error}`)
+  }
 });
 
 app.get("/values/current", async (req, res) => {
-  redisClient.hgetall("values", (err, values) => {
-    res.send(values);
-  });
+  try {
+    redisClient.hgetall("values", (err, values) => {
+      res.send(values);
+      console.error(`>>>>>>>> ERROR /values/current: ${err}`)
+    });
+  } catch (error) {
+    console.error(`>>>>>>>> ERROR /values/current: ${err}`)
+  }
 });
 
 app.post("/values", async (req, res) => {
