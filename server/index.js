@@ -22,7 +22,7 @@ const pgClient = new Pool({
 pgClient.on("connect", (client) => {
   client
     .query("CREATE TABLE IF NOT EXISTS values (number INT)")
-    .catch((err) => console.error(err));
+    .catch((err) => console.error(`>>>>>>>> ERROR!!!!! ${err}`));
 });
 
 // Redis Client Setup
@@ -67,5 +67,5 @@ app.post("/values", async (req, res) => {
 });
 
 app.listen(5000, (err) => {
-  console.log("Listening");
+  console.log(">>>>>> Listening!!!!");
 });
