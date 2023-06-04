@@ -19,11 +19,16 @@ const pgClient = new Pool({
   port: keys.pgPort,
 });
 
+console.log(`>>>>>>> KEYS: ${JSON.stringify(keys)}`)
+
 pgClient.on("connect", (client) => {
+  console.log(">>>>>>> on connect")
   client
     .query("CREATE TABLE IF NOT EXISTS values (number INT)")
     .catch((err) => console.error(`>>>>>>>> ERROR!!!!! ${err}`));
 });
+
+pgClient.on("error", (err) => console.error(`>>>>>>>>>> on error: ${err}`))
 
 // Redis Client Setup
 const redis = require("redis");
